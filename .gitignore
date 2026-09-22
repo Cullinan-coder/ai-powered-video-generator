@@ -15,3 +15,6 @@ yarn-error.log*
 # Workspace
 .vscode/
 .idea/
+
+# Kişisel değerli n8n kopyası
+local/

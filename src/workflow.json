@@ -1,303 +1,276 @@
 {
+  "name": "Fındık'ın Meslek Macerası",
   "nodes": [
     {
+      "parameters": {},
+      "id": "96a0fc4f-c65c-4e48-9bd4-9237569513b7",
+      "name": "Elle Başlat",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -120
+      ]
+    },
+    {
       "parameters": {
-        "url": "=https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "rule": {
+          "interval": [
             {
-              "name": "X-API-Key",
-              "value": "={{ $('Set API Keys').item.json['PiAPI Key'] }}"
+              "triggerAtHour": 7
             }
           ]
-        },
-        "options": {}
+        }
       },
-      "id": "03ef17d5-c875-4688-bd40-b5b1dc6a04d0",
-      "name": "Get image",
-      "type": "n8n-nodes-base.httpRequest",
+      "id": "076add7d-6a5b-4655-844f-1fd44f25508a",
+      "name": "Her Gün 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [
-        3488,
-        -832
+        0,
+        120
       ],
-      "typeVersion": 4.2
+      "disabled": true
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.piapi.ai/api/v1/task",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
+        "assignments": {
+          "assignments": [
             {
-              "name": "X-API-Key",
-              "value": "={{ $('Set API Keys').item.json['PiAPI Key'] }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={\n  \"model\": \"Qubico/flux1-dev\",\n  \"task_type\": \"txt2img\",\n  \"input\": {\n    \"prompt\": \"{{ $('Generate Image Prompts').item.json.choices[0].message.content }} realistic and casual as if taken by an iphone camera by a TikTok influencer\",\n    \"negative_prompt\": \"taking a photo of a room, recording a video of a room, photos app, video recorder, illegible text, blurry text, low quality text, DSLR, unnatural\",\n    \"width\": 540,\n    \"height\": 960\n  }\n}",
-        "options": {}
-      },
-      "id": "7e7ea93d-d019-48f7-ba32-69b3e3f7b9ba",
-      "name": "Generate Image",
-      "type": "n8n-nodes-base.httpRequest",
-      "position": [
-        3216,
-        -832
-      ],
-      "retryOnFail": false,
-      "typeVersion": 4.2
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.piapi.ai/api/v1/task",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-API-Key",
-              "value": "={{ $('Set API Keys').item.json['PiAPI Key'] }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={\n  \"model\": \"kling\",\n  \"task_type\": \"video_generation\",\n  \"input\": {\n    \"prompt\": \"{{ $json.data.input.prompt }}\",\n    \"negative_prompt\": \"blurry motion, distorted faces, unnatural lighting, over produced, bad quality\",\n    \"cfg_scale\": 0.5,\n    \"duration\": 5,\n    \"mode\": \"pro\",\n    \"image_url\": \"{{ $json.data.output.image_url }}\",\n    \"version\": \"1.6\",\n    \"camera_control\": {\n      \"type\": \"simple\",\n      \"config\": {\n        \"horizontal\": 0,\n        \"vertical\": 0,\n        \"pan\": 0,\n        \"tilt\": 0,\n        \"roll\": 0,\n        \"zoom\": 5\n      }\n    }\n  },\n  \"config\": {}\n}",
-        "options": {}
-      },
-      "id": "a4092fce-b9df-44fb-adff-f749f8307bd1",
-      "name": "Image-to-Video",
-      "type": "n8n-nodes-base.httpRequest",
-      "position": [
-        2848,
-        -304
-      ],
-      "typeVersion": 4.2
-    },
-    {
-      "parameters": {
-        "url": "=https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-API-Key",
-              "value": "={{ $('Set API Keys').item.json['PiAPI Key'] }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "7a7f78d0-3bde-484a-9de5-4fa01be23dc3",
-      "name": "Get Video",
-      "type": "n8n-nodes-base.httpRequest",
-      "position": [
-        3120,
-        -304
-      ],
-      "typeVersion": 4.2
-    },
-    {
-      "parameters": {
-        "jsCode": "return [\n  {\n    scene_titles: items.map(item => item.json.response.text),\n    video_urls: items.map(item => item.json.data.output.video_url),\n    input_tokens: $('Calculate Token Usage').first().json.total_prompt_tokens,\n    output_tokens: $('Calculate Token Usage').first().json.total_completion_tokens,\n    model: $('Generate Image Prompts').first().json.model\n  }\n];"
-      },
-      "id": "f98bfc8f-12b9-46f1-8834-c312b8feaea7",
-      "name": "List Elements",
-      "type": "n8n-nodes-base.code",
-      "position": [
-        3728,
-        -272
-      ],
-      "typeVersion": 2
-    },
-    {
-      "parameters": {
-        "amount": 10,
-        "unit": "minutes"
-      },
-      "id": "608361d5-fb1c-48dd-8f36-7f5239c2d627",
-      "name": "Wait 10min",
-      "type": "n8n-nodes-base.wait",
-      "position": [
-        2992,
-        -304
-      ],
-      "webhookId": "1f9d716f-6544-4e4e-94ec-408ac3ea6e82",
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "amount": 3,
-        "unit": "minutes"
-      },
-      "id": "55901fb6-2892-41bd-8ab5-91caa4fb0412",
-      "name": "Wait 3min",
-      "type": "n8n-nodes-base.wait",
-      "position": [
-        3344,
-        -832
-      ],
-      "webhookId": "77cdee73-5e99-456a-b5e7-410b4d257669",
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "unit": "minutes"
-      },
-      "id": "9aa24d7b-0144-4069-90f0-08506112b44f",
-      "name": "Wait 5min",
-      "type": "n8n-nodes-base.wait",
-      "position": [
-        3808,
-        -912
-      ],
-      "webhookId": "31d5b1a2-dbb5-4849-ae25-cb491539c16e",
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.elevenlabs.io/v1/text-to-speech/RXCCWbOxP7Hisa63Xsv5",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "xi-api-key",
-              "value": "={{ $('Set API Keys').item.json['ElevenLabs API Key'] }}"
+              "id": "71b209e0-0d5a-4ea3-a443-91b544aed649",
+              "name": "PiAPI Key",
+              "value": "YOUR_PIAPI_KEY",
+              "type": "string"
             },
             {
-              "name": "model_id",
-              "value": "eleven_multilingual_v2"
+              "id": "93dcc26e-2915-4208-af8c-5c8c6c1308c8",
+              "name": "ElevenLabs API Key",
+              "value": "YOUR_ELEVENLABS_KEY",
+              "type": "string"
+            },
+            {
+              "id": "e9f063bc-0c80-4f6e-8fd6-f05b05c14e80",
+              "name": "Creatomate API Key",
+              "value": "YOUR_CREATOMATE_KEY",
+              "type": "string"
+            },
+            {
+              "id": "9737799e-346a-4ab7-91d3-4eac53bb478a",
+              "name": "ElevenLabs Voice ID",
+              "value": "RXCCWbOxP7Hisa63Xsv5",
+              "type": "string"
+            },
+            {
+              "id": "340dab87-9193-4c1e-83bb-bbf641567bd3",
+              "name": "Google Sheet ID",
+              "value": "YOUR_GOOGLE_SHEET_ID",
+              "type": "string"
+            },
+            {
+              "id": "e2d46b4d-fb3a-4b1e-838b-05648b91535e",
+              "name": "Google Sheet Sekme ID",
+              "value": "0",
+              "type": "string"
+            },
+            {
+              "id": "b562fc12-f329-4291-ad34-41e5c68569ce",
+              "name": "Drive Ses Klasor ID",
+              "value": "YOUR_SESLER_FOLDER_ID",
+              "type": "string"
+            },
+            {
+              "id": "3c55dd79-b36a-495f-92f8-819aaa12ab03",
+              "name": "Drive Final Klasor ID",
+              "value": "YOUR_FINAL_FOLDER_ID",
+              "type": "string"
+            },
+            {
+              "id": "bd009320-d008-4074-bb39-7d4575075aae",
+              "name": "Drive Referans Klasor ID",
+              "value": "YOUR_REFERANS_FOLDER_ID",
+              "type": "string"
+            },
+            {
+              "id": "af485074-47db-4db2-aedc-fe194a3b3097",
+              "name": "Kling Mode",
+              "value": "std",
+              "type": "string"
+            },
+            {
+              "id": "2063aee3-e05b-4864-af1b-7103f7a7fba2",
+              "name": "Kling Version",
+              "value": "1.6",
+              "type": "string"
+            },
+            {
+              "id": "4a3c02e3-51fe-425b-9801-9b8ffae9b21d",
+              "name": "Minimum PiAPI Bakiye USD",
+              "value": "3.5",
+              "type": "string"
             }
           ]
         },
-        "sendBody": true,
-        "bodyParameters": {
+        "options": {}
+      },
+      "id": "6213cbc7-2f56-42c6-b62c-b49f860d2288",
+      "name": "Ayarlar",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.piapi.ai/account/info",
+        "sendHeaders": true,
+        "headerParameters": {
           "parameters": [
             {
-              "name": "text",
-              "value": "={{ $json.choices[0].message.content }}"
+              "name": "X-API-Key",
+              "value": "={{ $('Ayarlar').first().json['PiAPI Key'] }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "a809e2c0-9735-4738-ab37-cae60306ae56",
-      "name": "Generate voice",
+      "id": "76fcb448-486b-47f4-ac20-1401a0328950",
+      "name": "PiAPI Bakiye",
       "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        3216,
-        160
-      ],
-      "retryOnFail": false,
-      "typeVersion": 4.2
+        440,
+        0
+      ]
     },
     {
       "parameters": {
-        "jsCode": "return [\n  {\n    sound_urls: items.map(item => $('Upload Voice Audio').first().json.webContentLink)\n  }\n];"
+        "jsCode": "// PiAPI bakiyesi bir bölüme yetmiyorsa hiçbir şey üretmeden durur.\nconst info = $json.data ?? $json;\nconst usd = Number(info.equivalent_in_usd);\nconst min = Number($('Ayarlar').first().json['Minimum PiAPI Bakiye USD'] || 3.5);\nif (!Number.isFinite(usd)) {\n  throw new Error('PiAPI bakiyesi okunamadı. PiAPI Key doğru mu? Yanıt: ' + JSON.stringify($json).slice(0, 200));\n}\nif (usd < min) {\n  throw new Error(`PiAPI bakiyesi yetersiz: $${usd.toFixed(2)} (bir bölüm için en az $${min}). piapi.ai üzerinden kredi yükle.`);\n}\nreturn [{ json: { piapi_usd: usd } }];"
       },
-      "id": "7846e425-085e-464b-b390-604400360dfe",
-      "name": "List Elements1",
+      "id": "eebfb8b6-eee1-4ba9-abee-1c799ba7c24c",
+      "name": "Bakiye Kontrol",
       "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        3728,
-        -48
-      ],
-      "typeVersion": 2
+        660,
+        0
+      ]
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "version": 2,
-            "leftValue": "",
-            "caseSensitive": true,
-            "typeValidation": "strict"
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "trashed = false",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Ayarlar').first().json['Drive Referans Klasor ID'] }}",
+            "mode": "id"
           },
-          "combinator": "and",
-          "conditions": [
-            {
-              "id": "a920eb54-fc23-4b68-8f56-2eee907a5481",
-              "operator": {
-                "name": "filter.operator.equals",
-                "type": "string",
-                "operation": "equals"
-              },
-              "leftValue": "={{ $json.data.status }}",
-              "rightValue": "failed"
-            }
+          "whatToSearch": "files"
+        },
+        "limit": 10,
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType"
           ]
+        }
+      },
+      "id": "e5be7d64-40e0-4989-b1c6-9dc21ef8700a",
+      "name": "Referans Görseli Bul",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        0
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Drive'daki referans klasöründen Fındık'ın görselini seçer (PNG/JPEG/WebP).\nconst files = $input.all()\n  .map((i) => i.json)\n  .filter((f) => f.id && (String(f.mimeType || '').startsWith('image/') || /\\.(png|jpe?g|webp)$/i.test(f.name || '')));\nif (!files.length) {\n  throw new Error(\"Referans klasöründe görsel bulunamadı. Fındık'ın referans görselini Drive'daki referans klasörüne yükle.\");\n}\nconst f = files[0];\nreturn [{ json: { id: f.id, name: f.name, url: `https://drive.google.com/uc?export=download&id=${f.id}` } }];"
+      },
+      "id": "3ad09b19-caa6-4a1c-b556-c52ac13795a4",
+      "name": "Referans Kontrol",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone"
+          }
         },
         "options": {}
       },
-      "id": "cd09d9d9-aa8d-43a4-990a-f3510c20bea0",
-      "name": "Fail check",
-      "type": "n8n-nodes-base.if",
+      "id": "0a09c827-d52a-41f4-abab-938f6946d43c",
+      "name": "Referans Paylaşım İzni",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
       "position": [
-        3248,
-        -304
-      ],
-      "typeVersion": 2.2
+        1320,
+        0
+      ]
     },
     {
       "parameters": {
-        "unit": "minutes"
-      },
-      "id": "b277f045-2890-4bca-88f8-1a7806529ff9",
-      "name": "Wait to retry",
-      "type": "n8n-nodes-base.wait",
-      "position": [
-        3392,
-        -352
-      ],
-      "webhookId": "3b0fae8f-4419-45cd-8380-8f72eca05ff8",
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "modelId": {
+        "documentId": {
           "__rl": true,
-          "mode": "list",
-          "value": "o3-mini",
-          "cachedResultName": "O3-MINI"
+          "value": "={{ $('Ayarlar').first().json['Google Sheet ID'] }}",
+          "mode": "id"
         },
-        "messages": {
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Ayarlar').first().json['Google Sheet Sekme ID'] }}",
+          "mode": "id"
+        },
+        "filtersUI": {
           "values": [
             {
-              "content": "=You are an advanced, empathetic, and highly professional prompt-generation AI specializing in expanding short educational ideas into detailed, heartwarming 3D Pixar-style animation prompts optimized for Qubico/flux1-dev. Your task is to take a brief input tied to special education, autism awareness, dyslexia, down syndrome, or parenting, and morph it into a cinematic, emotionally resonant scene that educates and comforts the viewer.\n\nNEVER include quotation marks or emojis in your response—flux API will choke on them, and that is a hard no.\n\nThe topic of this narrative is: {{ $('Load Google Sheet').item.json.idea }}\n\nThe short prompt idea to expand for this image generation is: {{ $json.response.text }}\n\nONLY GENERATE ONE PROMPT PER IDEA—NO COMBINING. In at least one scene, weave in this environment descriptor: {{ $('Load Google Sheet').first().json.environment_prompt }}, ensuring the overall vibe is warm, educational, and professionally suited for a rehabilitation center.\n\nEvery prompt has two parts:\n\nForeground: Kick off with Cinematic highly detailed 3D animated shot of... and show a compassionate interaction between a parent, teacher, and a child with special needs, focusing on expressive faces, gentle body language, and educational tools.\n\nBackground: Start with in the background,... and paint the scenery, blending the environment descriptor when required, using soft lighting and comforting elements.\n\nTop Rules:\n\nNO quotation marks or emojis—EVER. This is life or death for flux.\nFocus on Pixar-style 3D animation—soft textures, warm lighting, expressive large eyes, and appealing, friendly character designs.\nShow positive, educational, or empathetic actions—calming a meltdown gently, using colorful learning tools, displaying patience and love.\nKeep it dynamic with cinematic depth of field and soft glowing lighting.\nNo disturbing or overly negative elements; even when depicting a challenge like a meltdown, frame it gently and hopefully.\n\nYour output MUST ONLY be the generated prompt. No other text."
+              "lookupColumn": "production",
+              "lookupValue": "for production"
             }
           ]
         },
-        "simplify": false,
         "options": {}
       },
-      "id": "8b132174-1d5d-4461-8c5b-3c2cf6b2d214",
-      "name": "Generate Image Prompts",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "id": "833c1730-016a-4771-860b-f661d1982226",
+      "name": "Bölümleri Oku",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
       "position": [
-        2736,
-        -752
+        1540,
+        0
       ],
-      "typeVersion": 1.8
+      "alwaysOutputData": true
     },
     {
       "parameters": {
-        "jsCode": "// Get all input items (the 5 LLM responses)\nconst items = $input.all();\n\n// Calculate total prompt tokens and total completion tokens\nconst totalPromptTokens = items.reduce((sum, item) => sum + item.json.usage.prompt_tokens, 0);\nconst totalCompletionTokens = items.reduce((sum, item) => sum + item.json.usage.completion_tokens, 0);\n\n// Create new items with original data plus the totals\nconst outputItems = items.map(item => ({\n  json: {\n    ...item.json,                   // Spread the original item data\n    total_prompt_tokens: totalPromptTokens,     // Add total prompt tokens\n    total_completion_tokens: totalCompletionTokens // Add total completion tokens\n  }\n}));\n\n// Return the modified items\nreturn outputItems;"
+        "maxItems": 1
       },
-      "id": "7a4cbc44-f608-4bcc-85de-745180c4c956",
-      "name": "Calculate Token Usage",
-      "type": "n8n-nodes-base.code",
+      "id": "e36b0e1c-a5a3-4948-887e-3d82c428b70c",
+      "name": "İlk Bölümü Al",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
       "position": [
-        3024,
-        -752
-      ],
-      "typeVersion": 2
+        1760,
+        0
+      ]
     },
     {
       "parameters": {
@@ -306,95 +279,32 @@
             "version": 2,
             "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "typeValidation": "loose"
           },
           "combinator": "and",
           "conditions": [
             {
-              "id": "567d1fc9-0638-4a44-b5f5-30a9a6683794",
+              "id": "816598ce-985b-407b-a967-77e1bb7683ce",
+              "leftValue": "={{ String($json.id ?? '') }}",
               "operator": {
-                "name": "filter.operator.equals",
                 "type": "string",
-                "operation": "equals"
-              },
-              "leftValue": "={{ $json.data.status }}",
-              "rightValue": "failed"
+                "operation": "notEmpty",
+                "singleValue": true
+              }
             }
           ]
         },
+        "looseTypeValidation": true,
         "options": {}
       },
-      "id": "f463ce5d-e98b-4816-9047-cc998a5347fb",
-      "name": "Check for failures",
+      "id": "b2a38a13-6a06-4a2d-a74a-f1673145e4ad",
+      "name": "Bölüm Var mı?",
       "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        3632,
-        -832
-      ],
-      "typeVersion": 2.2
-    },
-    {
-      "parameters": {
-        "content": "## 2. 🖼️Generate images with Flux using [PiAPI](https://piapi.ai/?via=n8n) \n### (total cost: $0.0948 approx. as of 3/9/25)\n1. OpenAI is used to generate 5 Flux image prompts based on the 5 captions generated. Edit this node to see/edit the prompt instructions. \n2. Next we use some custom javascript to total up how many tokens were used for each 5 generations so we can track our costs later.\n3. Then we generate an image with Flux using the [PiAPI service](https://piapi.ai/?via=n8n), waiting to check for failures and retrying if there are any.\n\nYou can change the image model used by editing the Generate Image node API call.\nFlux models available (as of 3/9/25):\n- Qubico/flux1-dev ($0.015) - Currently set\n- Qubico/flux1-schnell ($0.0015)\n- Qubico/flux1-advanced ($0.02)\n\nFor full list of API settings, see the [Flux API Documentation](https://piapi.ai/docs/flux-api/text-to-image?via=n8n)\n",
-        "height": 460,
-        "width": 1260,
-        "color": 5
-      },
-      "id": "7c870d98-d209-4916-9d08-9af5f65964c1",
-      "name": "Sticky Note1",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2704,
-        -1072
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "## 3. 🎬Generate videos with Kling using [PiAPI](https://piapi.ai/?via=n8n)\n### (total cost: $2.30 approx. as of 3/9/25)\n1. We use image-to-video with Kling using [PiAPI](https://piapi.ai/?via=n8n) to generate a video from each image.\n2. Then we wait to check for failures, and repeat the generations the failed if there are any.\n\nYou can edit the video model used in the Image-to-Video node. For testing, I'd recommend switching from pro to std for lower quality and cheaper price.\nKling models available (as of 3/9/25):\n- std (Standard) $0.26 per 5 second video\n- pro (Professional) $0.46 per 5 second video - Currently set\n\nFor full list of API settings, see the [Kling API Documentation](https://piapi.ai/docs/kling-api/create-task?via=n8n)\n",
-        "height": 500,
-        "width": 1040,
-        "color": 6
-      },
-      "id": "7b3ab270-244b-4289-b1de-ad57f6a49454",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2816,
-        -592
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "## 4. 🔉Generate voice overs with [Eleven Labs](https://try.elevenlabs.io/n8n)\n1. OpenAI API is used to generate a funny script that relates to the captions. Open this node to see/edit the prompt instructions. \n2. Then we use the [Eleven Labs API](https://try.elevenlabs.io/n8n) to generate the voiceover and upload it to our Google Drive so it can be accessed in the next step.\n\nTo replace the voice, find the voice ID of the voice you want to use in [Eleven Labs](https://try.elevenlabs.io/n8n), then change the URL in the Generate Voice node to: https://api.elevenlabs.io/v1/text-to-speech/{voice ID here}\n\nFor full list of API settings, see the [Eleven Labs API Documentation](https://elevenlabs.io/docs/api-reference/text-to-speech/convert)\n",
-        "height": 400,
-        "width": 1040,
-        "color": 4
-      },
-      "id": "ea71e05a-1507-4005-ae9d-73f00ae19310",
-      "name": "Sticky Note2",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2816,
-        -64
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {}
-      },
-      "id": "d0ffb102-d6db-4851-8d43-07e897896b34",
-      "name": "Match captions with videos",
-      "type": "n8n-nodes-base.merge",
-      "position": [
-        3568,
-        -272
-      ],
-      "typeVersion": 3
+        1980,
+        0
+      ]
     },
     {
       "parameters": {
@@ -407,30 +317,480 @@
         "messages": {
           "values": [
             {
-              "content": "=Sen güven veren, diksiyonu düzgün, uzman bir özel eğitim öğretmenisin. Sana verilen 5 bölümlük konuyu ebeveynleri aydınlatacak şekilde seslendirmen için bir metin hazırlayacaksın. Ses tonun şefkatli, sakin, profesyonel ve umut verici olmalı.\n\nKurallar:\nHer satır 5 saniyelik bir klibi temsil eder, bu yüzden cümleler kısa ve net olmalı. Toplam anlatım 15-20 saniye sürmeli.\nKonu otizm, disleksi veya davranış problemleri gibi hassas konular olduğu için son derece saygılı ve bilimsel bir dil kullan.\nYanıtında ASLA emoji veya tırnak işareti kullanma; metin sese dönüştürüleceği için sadece yazı ve noktalama işaretleri kullan. Format: Sadece seslendirilecek metin, her sahne için bir satır.\nFormat: Yanıtın sadece seslendirilecek metinden oluşmalı, her sahne için bir satır gelmeli.",
+              "content": "Sen 3-7 yaş çocuklar için kısa animasyon dizisi yazan deneyimli bir çocuk kitabı yazarı ve okul öncesi eğitimcisisin. Dizinin adı Fındık'ın Meslek Macerası. Ana karakter Fındık: 6 yaşında bir çocuk kadar meraklı, turuncu minik bir tilki. Sırtındaki sihirli sarı çanta onu her bölümde başka bir mesleğin dünyasına götürür.\n\nGörevin: Sana verilen bölüm bilgilerinden 10 sahnelik, her sahnesi 5 saniye süren bir bölüm senaryosu yazmak.\n\nSAHNE AKIŞI (bu sırayı bozma):\n1. Açılış: Fındık odasında izleyiciye el sallar.\n2. Yolculuk: sihirli çanta parlar, Fındık altın yapraklar arasında yolculuk eder.\n3. Varış: Fındık meslek yerine gelir ve şaşkınlıkla etrafına bakar.\n4. Tanışma: meslek sahibi Fındık'ı gülümseyerek karşılar ve kendini tanıtır.\n5. Meslek tanıtımı: meslek sahibi işini ve bir aletini gösterir.\n6. Sorun: Fındık verilen sorunu yaşar ya da küçük bir hata yapmak üzeredir.\n7. Öğretme: meslek sahibi nazikçe doğrusunu anlatır.\n8. Çözüm: Fındık doğru davranışı yapar.\n9. Bilgi: günün bilgisi basitçe söylenir.\n10. Kapanış: Fındık izleyiciye el sallar.\n\nANLATIM KURALLARI:\n- Her sahnenin anlatımı Türkçe ve EN FAZLA 10 kelime. Tek cümle ya da iki kısa cümle.\n- 3-7 yaş çocuğun anlayacağı basit, somut kelimeler kullan. Deyim, soyut kavram ve ironi kullanma.\n- Mesajı olumlu cümleyle ver.\n- Emoji ve tırnak işareti kullanma; metin sese dönüştürülecek.\n- Meslek sahibi her zaman nazik, sabırlı ve güven vericidir; bağırmaz, azarlamaz, korkutmaz.\n- Fındık hata yapmaya yaklaşır ama tehlikeli davranışı asla gerçekten yapmaz. Korkutucu, üzücü veya şiddet içeren hiçbir şey yazma.\n- Verilen bilgiyi değiştirme, yanlış bilgi ekleme.\n\nGÖRSEL ALANLAR (İngilizce yaz):\n- sahne_prompt: sahnede ne olduğunu anlatan tek cümlelik İngilizce görsel tarif. Karakterlere isimleriyle değin (Findik ve meslek sahibinin adı), ama görünüşlerini, kıyafetlerini veya mekânı TARİF ETME; bunları sistem otomatik ekleyecek. Yazı, tabela veya harf içeren nesne isteme.\n- hareket_prompt: 5 saniyelik klipte neyin nasıl hareket edeceğini anlatan kısa İngilizce tarif. Örnek: Findik waves happily, slow camera push in.\n- yardimci_var: meslek sahibi o sahnede görünüyorsa true, görünmüyorsa false.\n\nÖRNEK ANLATIM (1. bölüm, itfaiyeci):\n1 Merhaba, ben Fındık! Bugün hangi mesleği tanıyacağız?\n2 Çanta çanta, bizi götür!\n3 Vay canına, burası bir itfaiye istasyonu!\n4 Merhaba Fındık, ben itfaiyeci Ayşe.\n5 Biz yangınları söndürür, insanlara yardım ederiz.\n6 Fındık yerde parlak bir kibrit kutusu gördü.\n7 Dur Fındık, kibrit ve ateş oyuncak değildir.\n8 Fındık kibriti hemen bir büyüğe verdi.\n9 Yangın görürsek bir büyüğe söyler, 112'yi ararız.\n10 Bugün öğrendim ki ateş oyuncak değil. Görüşürüz!\n\nÇIKTI: Sadece şu yapıda geçerli bir JSON nesnesi döndür, başka hiçbir şey yazma:\n{\"sahneler\":[{\"no\":1,\"anlatim\":\"...\",\"sahne_prompt\":\"...\",\"hareket_prompt\":\"...\",\"yardimci_var\":false}]}\nsahneler dizisinde tam 10 sahne olmalı.",
               "role": "system"
             },
             {
-              "content": "={{ $('Generate Video Captions').item.json.choices[0].message.content }}"
+              "content": "=Bölüm {{ $('İlk Bölümü Al').first().json.bolum }}: {{ $('İlk Bölümü Al').first().json.baslik }}\nMeslek: {{ $('İlk Bölümü Al').first().json.meslek }}\nMeslek sahibi: {{ $('İlk Bölümü Al').first().json.yardimci_karakter }}\nKategori: {{ $('İlk Bölümü Al').first().json.kategori }}\nVerilecek değer: {{ $('İlk Bölümü Al').first().json.deger }}\nSorun (6. sahne): {{ $('İlk Bölümü Al').first().json.sorun }}\nGünün bilgisi (9. sahne): {{ $('İlk Bölümü Al').first().json.bilgi }}\nKapanış mesajı: Bugün öğrendim ki {{ $('İlk Bölümü Al').first().json.kapanis_mesaji }}"
             }
           ]
         },
         "simplify": false,
-        "options": {}
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.8
+        }
       },
-      "id": "5750ae60-5cd2-4598-bbce-7fadb2ace86d",
-      "name": "Generate Script",
+      "id": "ed84f0fd-f5db-48c8-8fb7-6b9bbf4dc335",
+      "name": "Senaryo Yaz",
       "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
       "position": [
-        2848,
-        160
-      ],
-      "executeOnce": true,
-      "typeVersion": 1.8
+        2200,
+        0
+      ]
     },
     {
       "parameters": {
-        "name": "={{ $('Load Google Sheet').item.json.id }}-voiceover.mp3",
+        "jsCode": "// Senaryoyu doğrular ve her sahne için görsel isteğini hazırlar.\n// Karakter kartı content/seri-rehberi.md ile birebir aynı olmalı.\nconst CHARACTER = 'Findik, a small cute anthropomorphic baby fox cub with soft fluffy bright orange fur, cream-white chest, cheeks and muzzle, big pointed ears, a big fluffy tail with a cream-white tip, big round emerald-green eyes, small dark brown nose, wearing a red knitted scarf with one end hanging down the front and a small yellow backpack with a green leaf patch on the flap, standing upright on two legs, child-sized';\nconst STYLE = '3D Pixar-style animation, soft warm lighting, vibrant friendly colors, child-friendly, cinematic composition, vertical 9:16 frame';\nconst ROOM = 'inside a cozy warm tree-hollow bedroom with a round wooden window showing a green forest, soft morning sunlight';\nconst TRAVEL = 'surrounded by swirling golden sparkles and flying autumn leaves, magical glowing light';\n\nconst ep = $('İlk Bölümü Al').first().json;\nconst ref = $('Referans Kontrol').first().json.url;\n\nconst fail = (msg) => {\n  if ($runIndex >= 2) throw new Error('Senaryo 3 denemede geçerli üretilemedi: ' + msg);\n  return [{ json: { valid: false, error: msg } }];\n};\n\nconst clean = (t) => String(t ?? '')\n  .replace(/[\"“”«»]/g, '')\n  .replace(/[\\u{1F300}-\\u{1FAFF}\\u{2600}-\\u{27BF}]/gu, '')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nlet data = $input.first().json.choices?.[0]?.message?.content;\nif (typeof data === 'string') {\n  try {\n    data = JSON.parse(data.replace(/^```(json)?/, '').replace(/```$/, '').trim());\n  } catch (e) {\n    return fail('JSON okunamadı');\n  }\n}\nconst sahneler = Array.isArray(data?.sahneler) ? data.sahneler : [];\nif (sahneler.length !== 10) return fail(`10 yerine ${sahneler.length} sahne geldi`);\n\n// Açılış, yolculuk ve kapanış her bölümde aynı kalır.\nconst fixed = {\n  1: {\n    anlatim: 'Merhaba, ben Fındık! Bugün hangi mesleği tanıyacağız?',\n    sahne_prompt: 'Findik smiles and waves happily at the viewer',\n    hareket_prompt: 'Findik waves happily at the camera, gentle slow camera push in',\n    mekan: ROOM,\n    yardimci_var: false,\n  },\n  2: {\n    anlatim: 'Çanta çanta, bizi götür!',\n    sahne_prompt: 'Findik excitedly holds the straps of the glowing magical yellow backpack',\n    hareket_prompt: 'the backpack glows brightly, golden sparkles and autumn leaves swirl around Findik',\n    mekan: TRAVEL,\n    yardimci_var: false,\n  },\n  10: { anlatim: `Bugün öğrendim ki ${clean(ep.kapanis_mesaji)}. Görüşürüz!` },\n};\n\nconst episode = {\n  id: ep.id,\n  bolum: ep.bolum,\n  meslek: ep.meslek,\n};\n\nconst items = [];\nfor (let i = 0; i < 10; i++) {\n  const no = i + 1;\n  const s = { ...sahneler[i], ...(fixed[no] || {}) };\n  const narration = clean(s.anlatim);\n  const words = narration.split(' ').filter(Boolean).length;\n  if (!narration) return fail(`Sahne ${no} anlatımı boş`);\n  if (words > 14) return fail(`Sahne ${no} anlatımı çok uzun (${words} kelime)`);\n  if (!clean(s.sahne_prompt)) return fail(`Sahne ${no} görsel tarifi boş`);\n\n  const helper = s.yardimci_var === true || s.yardimci_var === 'true';\n  const setting = s.mekan || ep.mekan_prompt;\n  const prompt = [\n    CHARACTER,\n    helper ? ep.yardimci_karakter_prompt : null,\n    clean(s.sahne_prompt),\n    setting ? `Setting: ${setting}` : null,\n    STYLE,\n  ].filter(Boolean).join('. ');\n\n  // Fındık her sahnede Drive'daki referans görsele göre çizilir (Flux Kontext).\n  const image_request = {\n    model: 'Qubico/flux1-dev-advanced',\n    task_type: 'kontext',\n    input: {\n      prompt: `Keep the fox character from the reference image exactly the same: same face, same orange fur, same red knitted scarf and yellow backpack with the green leaf. New scene: ${prompt}`,\n      image: ref,\n      width: 576,\n      height: 1024,\n      steps: 28,\n    },\n  };\n\n  items.push({\n    json: {\n      valid: true,\n      scene: no,\n      narration,\n      image_request,\n      video_prompt: clean(s.hareket_prompt) || 'gentle natural movement, slow camera push in',\n      episode,\n    },\n  });\n}\n\n// Görsel/video tekrar deneme sayaçlarını sıfırla.\n$getWorkflowStaticData('global').retries = {};\nreturn items;"
+      },
+      "id": "80cc43d4-5f06-4f97-a0e0-1451b5f30d59",
+      "name": "Senaryoyu Ayrıştır",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "dab34fe5-be7b-4ab0-8b3a-4e41d98f0e1c",
+              "leftValue": "={{ $json.valid }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "5262c30b-397f-440c-9aa3-4b88e8647729",
+      "name": "Senaryo Geçerli mi?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "a9e278a4-675e-4196-a642-25fe8b218636",
+      "name": "Sahne Döngüsü",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2860,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.piapi.ai/api/v1/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Ayarlar').first().json['PiAPI Key'] }}"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($('Sahne Döngüsü').item.json.image_request) }}"
+      },
+      "id": "c6c94a07-ee6a-4113-bb1b-c17b42247d43",
+      "name": "Görsel Üret",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3100,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "c48cd497-31c5-4904-bde6-f97601b698a7",
+      "name": "Görseli Bekle",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3300,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Ayarlar').first().json['PiAPI Key'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "451a5f1e-156b-4718-b604-94a40195db21",
+      "name": "Görsel Durumu",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3500,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// PiAPI görev durumunu yorumlar: done = hazır, retry = hata aldı tekrar üret, wait = beklemeye devam.\nconst data = $json.data || {};\nconst status = String(data.status || '').toLowerCase();\nconst scene = $('Sahne Döngüsü').item.json.scene;\nconst store = $getWorkflowStaticData('global');\nstore.retries = store.retries || {};\nconst bump = (k) => (store.retries[k] = (store.retries[k] || 0) + 1);\n\nlet route = 'wait';\nif (status === 'completed') {\n  route = 'done';\n} else if (status === 'failed') {\n  if (bump(`img-fail-${scene}`) > 3) {\n    throw new Error(`Sahne ${scene}: görsel 3 denemede üretilemedi. ${JSON.stringify(data.error || {})}`);\n  }\n  route = 'retry';\n} else if (bump(`img-poll-${scene}`) > 30) {\n  throw new Error(`Sahne ${scene}: görsel 30 kontrolde hazır olmadı (durum: ${status || 'bilinmiyor'})`);\n}\nreturn { json: { ...$json, route } };"
+      },
+      "id": "aad7418e-032c-4fb3-860a-5bd97604ccf3",
+      "name": "Görsel Kontrol",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3700,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "6a03a0f0-8041-4dd2-a6c5-12c04743ecb8",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "done"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "39c1d268-d2da-4836-87f1-54e1e166fb43",
+      "name": "Görsel Hazır mı?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3900,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "39e03925-d93e-465a-8693-990c0dcf64a9",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "retry"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "cb3dc21c-53c4-44af-81ea-02602effb423",
+      "name": "Görsel Hatalı mı?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4100,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "8265f4cb-82c8-4ded-b9e2-c1dd265acf3b",
+      "name": "Görseli Tekrar Bekle",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4300,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.piapi.ai/api/v1/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Ayarlar').first().json['PiAPI Key'] }}"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'kling', task_type: 'video_generation', input: { prompt: $('Sahne Döngüsü').item.json.video_prompt, negative_prompt: 'blurry motion, distorted faces, extra limbs, morphing, flickering, scary, dark, text, watermark, bad quality', cfg_scale: 0.5, duration: 5, mode: $('Ayarlar').first().json['Kling Mode'], version: $('Ayarlar').first().json['Kling Version'], image_url: $('Görsel Kontrol').item.json.data.output.image_url } }) }}"
+      },
+      "id": "3896a446-6d45-4a76-88da-04a3f0ae59d1",
+      "name": "Video Üret",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4300,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "id": "b3796f80-e3ec-4520-b644-b0668e63699e",
+      "name": "Videoyu Bekle",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4500,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.piapi.ai/api/v1/task/{{ $json.data.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{ $('Ayarlar').first().json['PiAPI Key'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1f1d94f4-ee80-4e5c-b173-23bf864bab51",
+      "name": "Video Durumu",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4700,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// PiAPI görev durumunu yorumlar: done = hazır, retry = hata aldı tekrar üret, wait = beklemeye devam.\nconst data = $json.data || {};\nconst status = String(data.status || '').toLowerCase();\nconst scene = $('Sahne Döngüsü').item.json.scene;\nconst store = $getWorkflowStaticData('global');\nstore.retries = store.retries || {};\nconst bump = (k) => (store.retries[k] = (store.retries[k] || 0) + 1);\n\nlet route = 'wait';\nif (status === 'completed') {\n  route = 'done';\n} else if (status === 'failed') {\n  if (bump(`vid-fail-${scene}`) > 3) {\n    throw new Error(`Sahne ${scene}: video 3 denemede üretilemedi. ${JSON.stringify(data.error || {})}`);\n  }\n  route = 'retry';\n} else if (bump(`vid-poll-${scene}`) > 40) {\n  throw new Error(`Sahne ${scene}: video 40 kontrolde hazır olmadı (durum: ${status || 'bilinmiyor'})`);\n}\nreturn { json: { ...$json, route } };"
+      },
+      "id": "ba24efa0-3303-4c9f-bac6-38160e6c21de",
+      "name": "Video Kontrol",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4900,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "04fc4b5f-c5b0-4c4c-8fa4-8c3c73583983",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "done"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "da8ec2bf-c069-445a-a390-f311e1796b27",
+      "name": "Video Hazır mı?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5100,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f684644e-baf4-493d-b2e7-1bf6d875b6f8",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "retry"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "5733eaaa-2218-44ef-8d1f-3a6e9487c13e",
+      "name": "Video Hatalı mı?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5300,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "dfa391d8-fc51-40c9-9f54-cf7837f902ce",
+      "name": "Videoyu Tekrar Bekle",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5500,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Sahnenin bilgilerini üretilen video ile birlikte döngüye geri verir.\nconst scene = $('Sahne Döngüsü').item.json;\nconst out = $json.data?.output || {};\nconst video_url = out.video_url\n  || out.works?.[0]?.video?.resource_without_watermark\n  || out.works?.[0]?.video?.resource;\nif (!video_url) throw new Error(`Sahne ${scene.scene}: video adresi bulunamadı`);\n\nconst { image_request, ...rest } = scene;\nreturn {\n  json: {\n    ...rest,\n    image_url: $('Görsel Kontrol').item.json.data.output.image_url,\n    video_url,\n  },\n};"
+      },
+      "id": "0aabdb03-ba5b-428a-bb89-b59bb730168a",
+      "name": "Sahneyi Kaydet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5300,
+        -700
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Döngüden çıkan 10 sahneyi tek bir bölüm kaydında toplar.\nconst scenes = $input.all().map((i) => i.json).sort((a, b) => a.scene - b.scene);\nif (scenes.length !== 10) throw new Error(`10 sahne bekleniyordu, ${scenes.length} geldi`);\n\nreturn [{\n  json: {\n    ...scenes[0].episode,\n    scenes: scenes.map(({ scene, narration, image_url, video_url }) => ({\n      scene, narration, image_url, video_url,\n    })),\n    narration_text: scenes.map((s) => s.narration).join(' '),\n  },\n}];"
+      },
+      "id": "3526a1f9-2d61-4fb2-9ac5-ce0a53819d1c",
+      "name": "Bölümü Topla",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3100,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.elevenlabs.io/v1/text-to-speech/{{ $('Ayarlar').first().json['ElevenLabs Voice ID'] }}?output_format=mp3_44100_128",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "={{ $('Ayarlar').first().json['ElevenLabs API Key'] }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ text: $json.narration_text, model_id: 'eleven_multilingual_v2', voice_settings: { stability: 0.6, similarity_boost: 0.75, style: 0.2, use_speaker_boost: true, speed: 0.9 } }) }}"
+      },
+      "id": "78554c00-7d68-4187-91c8-60df39de61bf",
+      "name": "Seslendir",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "name": "=bolum-{{ $('Bölümü Topla').first().json.bolum }}-seslendirme.mp3",
         "driveId": {
           "__rl": true,
           "mode": "list",
@@ -438,19 +798,19 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "YOUR_DRIVE_FOLDER_ID",
+          "value": "={{ $('Ayarlar').first().json['Drive Ses Klasor ID'] }}",
           "mode": "id"
         },
         "options": {}
       },
-      "id": "25d73ab5-f99b-4b85-8fdd-9ac09329ce8f",
-      "name": "Upload Voice Audio",
+      "id": "aa37c797-613b-402c-9446-f111e35e8f8b",
+      "name": "Ses Dosyasını Yükle",
       "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
       "position": [
-        3408,
-        160
-      ],
-      "typeVersion": 3
+        3500,
+        400
+      ]
     },
     {
       "parameters": {
@@ -462,47 +822,44 @@
         },
         "permissionsUi": {
           "permissionsValues": {
-            "role": "writer",
-            "type": "anyone",
-            "allowFileDiscovery": true
+            "role": "reader",
+            "type": "anyone"
           }
         },
         "options": {}
       },
-      "id": "3a194bf7-fc7a-47e3-a4f2-29e5673a8a46",
-      "name": "Set Access Permissions",
+      "id": "6d756c24-908d-4d73-a338-4dc9d1c39f62",
+      "name": "Ses Paylaşım İzni",
       "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
       "position": [
-        3584,
-        160
-      ],
-      "typeVersion": 3
+        3700,
+        400
+      ]
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {}
+        "jsCode": "// Creatomate için kurguyu (RenderScript) hazırlar: 10 klip + seslendirme.\nconst ep = $('Bölümü Topla').first().json;\nconst voiceId = $('Ses Dosyasını Yükle').first().json.id;\nconst voiceUrl = `https://drive.google.com/uc?export=download&id=${voiceId}`;\nconst SCENE_SECONDS = 5;\nconst total = ep.scenes.length * SCENE_SECONDS;\n\nconst elements = ep.scenes.map((s, i) => ({\n  name: `Video-${i + 1}`,\n  type: 'video',\n  track: 1,\n  time: i * SCENE_SECONDS,\n  duration: SCENE_SECONDS,\n  source: s.video_url,\n  fit: 'cover',\n  volume: '0%',\n}));\n\nelements.push({ name: 'Voice', type: 'audio', track: 2, time: 0.3, source: voiceUrl });\n\n\nreturn [{\n  json: {\n    render: { output_format: 'mp4', width: 1080, height: 1920, frame_rate: 30, duration: total, elements },\n  },\n}];"
       },
-      "id": "42bfa6b6-583b-4cc7-b70e-eb481c38c0b0",
-      "name": "Pair Videos with Audio",
-      "type": "n8n-nodes-base.merge",
+      "id": "0aa2f53c-b65c-4356-84aa-623860d211b7",
+      "name": "Kurgu Hazırla",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        3952,
-        -160
-      ],
-      "typeVersion": 3
+        3900,
+        400
+      ]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.creatomate.com/v1/renders",
+        "url": "https://api.creatomate.com/v2/renders",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $('Set API Keys').item.json['Creatomate API Key'] }}"
+              "value": "=Bearer {{ $('Ayarlar').first().json['Creatomate API Key'] }}"
             },
             {
               "name": "Content-Type",
@@ -510,158 +867,44 @@
             }
           ]
         },
+        "options": {},
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={\n  \"template_id\": \"{{ $('Set API Keys').item.json['Creatomate Template ID'] }}\",\n  \"modifications\": {\n    \n    \"Video-1.source\": \"{{ $json.video_urls[0] }}\",\n    \"Video-2.source\": \"{{ $json.video_urls[1] }}\",\n    \"Video-3.source\": \"{{ $json.video_urls[2] }}\",\n    \"Video-4.source\": \"{{ $json.video_urls[3] }}\",\n    \"Video-5.source\": \"{{ $json.video_urls[4] }}\",\n\n    \"Audio-1.source\": \"{{ $json.sound_urls[0] }}\",\n\n    \"Text-1.text\": \"{{ $json.scene_titles[0] }}\",\n    \"Text-2.text\": \"{{ $json.scene_titles[1] }}\",\n    \"Text-3.text\": \"{{ $json.scene_titles[2] }}\",\n    \"Text-4.text\": \"{{ $json.scene_titles[3] }}\",\n    \"Text-5.text\": \"{{ $json.scene_titles[4] }}\"\n  }\n}",
-        "options": {}
+        "body": "={{ JSON.stringify($json.render) }}"
       },
-      "id": "06896e43-e180-44b5-882e-34702622106b",
-      "name": "Render Final Video",
+      "id": "fb68bc1d-e2ef-4bbc-8c15-49c2bfb1b039",
+      "name": "Videoyu Birleştir",
       "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        4128,
-        -160
-      ],
-      "executeOnce": true,
-      "typeVersion": 4.2
+        4100,
+        400
+      ]
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 7
-            }
-          ]
-        }
-      },
-      "id": "bf97cf42-d989-4fa6-a889-ded928239910",
-      "name": "Once Per Day",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "position": [
-        1728,
-        -80
-      ],
-      "typeVersion": 1.2
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "YOUR_GOOGLE_SHEET_ID",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "production",
-              "lookupValue": "for production"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "703896fa-5f1e-42ac-9d29-2c01f680af0c",
-      "name": "Load Google Sheet",
-      "type": "n8n-nodes-base.googleSheets",
-      "position": [
-        2144,
-        -128
-      ],
-      "typeVersion": 4.5,
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "jsCode": "// Get the text directly from the OpenAI response\nconst text = $input.first().json.choices[0].message.content;\n\n// Split the text on literal '\\\\n', trim, and filter empty lines\nconst lines = text.split('\\\\n').map(line => line.trim()).filter(line => line !== '');\n\n// Create an array of items for n8n\nconst items = lines.map(line => ({\n  json: {\n    response: { text: line }\n  }\n}));\n\n// Return the array of items\nreturn items;"
-      },
-      "id": "f396d13d-9621-45e5-b185-d228d4f95fb7",
-      "name": "Create List",
-      "type": "n8n-nodes-base.code",
-      "position": [
-        2608,
-        -160
-      ],
-      "typeVersion": 2
-    },
-    {
-      "parameters": {
-        "content": "## 5. 📥Complete video with [Creatomate](https://creatomate.com/)\n### (total cost: $0.38 approx. with the Essential plan credits | Free trial credits available)\n1. First, the list of videos/captions is combined with the generated voice over into a single item containing all 3 elements.\n2. Those are then passed over to the Creatomate Template ID you specified, replacing the template captions/video/audio with your generated ones.\n3. When the video is finished rendering, it's then uploaded to Google Drive and the permissions set so it can be accessed with a link.\n4. Then we update the original Google Sheet template with the information from our generation, including tokens to calculate cost, then mark this idea as completed.\n5. Finally, we send a notification to via [webhook to the Discord server](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) when the video is ready to be downloaded and used!\n\n",
-        "height": 380,
-        "width": 1360,
-        "color": 3
-      },
-      "id": "eac7249d-e3a4-42d3-a0ff-743d09b82406",
-      "name": "Sticky Note3",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        3888,
-        -384
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "# 🤖 AI-Powered Short-Form Video Generator with OpenAI, Flux, Kling, and ElevenLabs\n\n## 📃Before you get started, you'll need:\n- [n8n installation](https://n8n.partnerlinks.io/n8nTTVideoGenTemplate) (tested on version 1.81.4)\n- [OpenAI API Key](https://platform.openai.com/api-keys) (free trial credits available)\n- [PiAPI](https://piapi.ai/?via=n8n) (free trial credits available)\n- [Eleven Labs](https://try.elevenlabs.io/n8n) (free account)\n- [Creatomate API Key](https://creatomate.com/) (free trial credits available)\n- Google Sheets API enabled in [Google Cloud Console](https://console.cloud.google.com/apis/api/sheets.googleapis.com/overview)\n- Google Drive API enabled in [Google Cloud Console](https://console.cloud.google.com/apis/api/drive.googleapis.com/overview)\n- OAuth 2.0 Client ID and Client Secret from your [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials)\n",
-        "height": 420,
-        "width": 620
-      },
-      "id": "f77e70a4-a09e-4dcd-bee0-ba56bfc0d318",
-      "name": "Sticky Note4",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2032,
-        -1040
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "## 1. 🗨️Generate video captions from ideas in a Google Sheet\n\n1. Setup your API keys for [PiAPI](https://piapi.ai/?via=n8n), [Eleven Labs](https://try.elevenlabs.io/n8n), and [Creatomate](https://creatomate.com/).\n- Once logged in to your Creatomate account, create a new video template and click \"source code\" in the top right. [Paste this JSON code](https://pastebin.com/c7aMTeLK). This will be your example template for this workflow.\n- In your Creatomate template, click the \"Use Template\" button in the top right and then click \"API Integration\" and you'll see your template_id. Set this value as your Creatomate Template ID in the Set API Keys node\n\n2. The next node will load a Google Sheet, you can copy the [Google Sheet Template](https://docs.google.com/spreadsheets/d/1cjd8p_yx-M-3gWLEd5TargtoB35cW-3y66AOTNMQrrM/edit?usp=sharing), simply choose File > Make a copy. Then in the Google Sheets node, connect to your copied sheet template.\n\n3. Next, we generate 5 captions for our video idea with OpenAI. You can edit this node to see the prompt and change it to your needs.\n\n4. In the final two nodes, we use custom javascript code to turn the OpenAI response into a list. Then, it validates to make sure the list was formed correctly (incase of an OpenAI failure to follow instructions)\n",
-        "height": 700,
-        "width": 920,
-        "color": 7
-      },
-      "id": "c27718a1-ac7f-4f5a-87d0-e0d1b3ed0b74",
-      "name": "Sticky Note5",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1840,
-        -496
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "amount": 3,
+        "amount": 1,
         "unit": "minutes"
       },
-      "id": "fdb5d425-9fdc-4c41-9eb9-1f0a052cfa04",
-      "name": "Wait1",
+      "id": "1623a6f9-c19d-41c4-a77d-38d91820c685",
+      "name": "Kurguyu Bekle",
       "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
       "position": [
-        4256,
-        -160
-      ],
-      "webhookId": "206d0cdf-b71f-44a7-909f-97df885c471a",
-      "typeVersion": 1.1
+        4300,
+        400
+      ]
     },
     {
       "parameters": {
-        "url": "=https://api.creatomate.com/v1/renders/{{ $('Render Final Video').item.json.id }}",
+        "url": "=https://api.creatomate.com/v2/renders/{{ $('Videoyu Birleştir').first().json.id }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $('Set API Keys').item.json['Creatomate API Key'] }}"
+              "value": "=Bearer {{ $('Ayarlar').first().json['Creatomate API Key'] }}"
             },
             {
               "name": "Content-Type",
@@ -671,39 +914,95 @@
         },
         "options": {}
       },
-      "id": "75011bac-b326-4537-96d0-0bd012a5cabd",
-      "name": "Get Final Video",
+      "id": "3d8bfcf7-c579-490f-a46e-84bb20eafad3",
+      "name": "Kurgu Durumu",
       "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        4368,
-        -160
-      ],
-      "executeOnce": true,
-      "typeVersion": 4.2
+        4500,
+        400
+      ]
     },
     {
       "parameters": {
-        "name": "=POV-{{ $('Render Final Video').item.json.id }}.mp4",
-        "driveId": {
-          "__rl": true,
-          "mode": "list",
-          "value": "My Drive"
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ed1cf8e6-a154-42bf-95bb-6e0448db04b4",
+              "leftValue": "={{ $json.status }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "succeeded"
+            }
+          ]
         },
-        "folderId": {
-          "__rl": true,
-          "value": "YOUR_DRIVE_FOLDER_ID",
-          "mode": "id"
-        },
+        "looseTypeValidation": true,
         "options": {}
       },
-      "id": "6f873bd2-761f-42a7-aabf-c857cd893642",
-      "name": "Upload Final Video",
-      "type": "n8n-nodes-base.googleDrive",
+      "id": "dcc8a997-336e-4b63-96b6-8c1328589640",
+      "name": "Kurgu Hazır mı?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        4624,
-        -160
-      ],
-      "typeVersion": 3
+        4700,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "47619336-9b16-401a-a74b-8e469b181c86",
+              "leftValue": "={{ $json.status }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "failed"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "9bb7dbda-0e21-4f16-875f-8606d5306f33",
+      "name": "Kurgu Hatalı mı?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4900,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Creatomate kurgusu başarısız oldu: {{ $json.error_message || 'bilinmeyen hata' }}"
+      },
+      "id": "0b597fe7-7853-48a7-a289-d53bd85b26be",
+      "name": "Kurgu Hatası",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        5100,
+        500
+      ]
     },
     {
       "parameters": {
@@ -716,928 +1015,830 @@
           }
         }
       },
-      "id": "e2993e27-b593-45b6-82b4-704fe08bf47b",
-      "name": "Get Raw File",
+      "id": "38806242-18de-42f6-9bf8-82964a487d47",
+      "name": "Videoyu İndir",
       "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        4496,
-        -160
-      ],
-      "typeVersion": 4.2
+        4900,
+        300
+      ]
     },
     {
       "parameters": {
-        "operation": "share",
-        "fileId": {
+        "name": "=Bölüm {{ $('Bölümü Topla').first().json.bolum }} - {{ $('Bölümü Topla').first().json.meslek }}.mp4",
+        "driveId": {
           "__rl": true,
-          "mode": "id",
-          "value": "={{ $json.id }}"
+          "mode": "list",
+          "value": "My Drive"
         },
-        "permissionsUi": {
-          "permissionsValues": {
-            "role": "writer",
-            "type": "anyone",
-            "allowFileDiscovery": true
-          }
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Ayarlar').first().json['Drive Final Klasor ID'] }}",
+          "mode": "id"
         },
         "options": {}
       },
-      "id": "3fbd47d2-3880-47c4-8598-c0cb5688bc88",
-      "name": "Set Permissions",
+      "id": "bf05db96-7e7c-478f-ba0f-5f654eeff858",
+      "name": "Videoyu Arşivle",
       "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
       "position": [
-        4768,
-        -160
-      ],
-      "typeVersion": 3
+        5100,
+        300
+      ]
     },
     {
       "parameters": {
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "YOUR_GOOGLE_SHEET_ID",
+          "value": "={{ $('Ayarlar').first().json['Google Sheet ID'] }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "mode": "list",
-          "value": "gid=0",
-          "cachedResultName": "Sheet1"
+          "value": "={{ $('Ayarlar').first().json['Google Sheet Sekme ID'] }}",
+          "mode": "id"
         },
         "columns": {
-          "value": {
-            "id": "={{ $('Load Google Sheet').first().json.id }}",
-            "width": "={{ $('Get Raw File').item.json.width }}",
-            "height": "={{ $('Get Raw File').item.json.height }}",
-            "model1": "={{ $('Generate Video Captions').item.json.model }}",
-            "model2": "={{ $('Pair Videos with Audio').item.json.model }}",
-            "model3": "={{ $('Generate Script').item.json.model }}",
-            "duration": "={{ $('Get Raw File').item.json.duration }}",
-            "fluxCost": "0.075",
-            "frameRate": "={{ $('Get Raw File').item.json.frame_rate }}",
-            "klingCost": "2.3",
-            "production": "done",
-            "publishing": "for publishing",
-            "final_output": "={{ $('Upload Final Video').item.json.webContentLink }}",
-            "prompt1 input tokens": "={{ $('Generate Video Captions').item.json.usage.prompt_tokens }}",
-            "prompt2 input tokens": "={{ $('Pair Videos with Audio').item.json.input_tokens }}",
-            "prompt3 input tokens": "={{ $('Generate Script').item.json.usage.prompt_tokens }}",
-            "prompt1 output tokens": "={{ $('Generate Video Captions').item.json.usage.completion_tokens }}",
-            "prompt2 output tokens": "={{ $('Pair Videos with Audio').item.json.output_tokens }}",
-            "prompt3 output tokens": "={{ $('Generate Script').item.json.usage.completion_tokens }}"
-          },
-          "schema": [
-            {
-              "id": "id",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "id",
-              "defaultMatch": true,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "idea",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "idea",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "caption",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "caption",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "production",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "production",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "environment_prompt",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "environment_prompt",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "publishing",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "publishing",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "final_output",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "final_output",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "width",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "width",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "height",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "height",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "duration",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "duration",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "frameRate",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "frameRate",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "model1",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "model1",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "prompt1 input tokens",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "prompt1 input tokens",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "prompt1 output tokens",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "prompt1 output tokens",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "model1 cost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "model1 cost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "model2",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "model2",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "prompt2 input tokens",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "prompt2 input tokens",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "prompt2 output tokens",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "prompt2 output tokens",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "model2 cost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "model2 cost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "model3",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "model3",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "prompt3 input tokens",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "prompt3 input tokens",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "prompt3 output tokens",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "prompt3 output tokens",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "model3 cost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "model3 cost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "cmCost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "cmCost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "upgradeCmCost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "upgradeCmCost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fluxCost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "fluxCost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "klingCost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "klingCost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "totalCost",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "totalCost",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "datePosted",
-              "type": "string",
-              "display": true,
-              "removed": false,
-              "required": false,
-              "displayName": "datePosted",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "row_number",
-              "type": "string",
-              "display": true,
-              "removed": true,
-              "readOnly": true,
-              "required": false,
-              "displayName": "row_number",
-              "defaultMatch": false,
-              "canBeUsedToMatch": true
-            }
-          ],
           "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Bölümü Topla').first().json.id }}",
+            "production": "done",
+            "final_output": "=https://drive.google.com/file/d/{{ $json.id }}/view"
+          },
           "matchingColumns": [
             "id"
           ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "id": "71375212-c0b9-47c1-8cdf-500179bb593f",
-      "name": "Update Google Sheet",
-      "type": "n8n-nodes-base.googleSheets",
-      "position": [
-        4912,
-        -160
-      ],
-      "typeVersion": 4.5
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
+          "schema": [
             {
-              "id": "35659353-d8e2-4677-876b-401b549605a0",
-              "name": "PiAPI Key",
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
               "type": "string",
-              "value": "YOUR_PIAPI_KEY"
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
-              "id": "c4927dd6-c597-48fe-b7c1-bbffcf5ff02f",
-              "name": "ElevenLabs API Key",
+              "id": "bolum",
+              "displayName": "bolum",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
               "type": "string",
-              "value": "YOUR_ELEVENLABS_KEY"
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
-              "id": "f5e90c05-dd24-4918-9005-4c87a4fb344d",
-              "name": "Creatomate API Key",
+              "id": "baslik",
+              "displayName": "baslik",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
               "type": "string",
-              "value": "YOUR_CREATOMATE_KEY"
+              "canBeUsedToMatch": true,
+              "removed": true
             },
             {
-              "id": "d0ebba50-5a99-4090-adcb-d18aa0b21be2",
-              "name": "Creatomate Template ID",
+              "id": "meslek",
+              "displayName": "meslek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
               "type": "string",
-              "value": "YOUR_CREATOMATE_TEMPLATE_ID"
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "yardimci_karakter",
+              "displayName": "yardimci_karakter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "yardimci_karakter_prompt",
+              "displayName": "yardimci_karakter_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "mekan_prompt",
+              "displayName": "mekan_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kategori",
+              "displayName": "kategori",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "deger",
+              "displayName": "deger",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sorun",
+              "displayName": "sorun",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "bilgi",
+              "displayName": "bilgi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kapanis_mesaji",
+              "displayName": "kapanis_mesaji",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "production",
+              "displayName": "production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "publishing",
+              "displayName": "publishing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_output",
+              "displayName": "final_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtube_url",
+              "displayName": "youtube_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
             }
           ]
         },
         "options": {}
       },
-      "id": "ad62be2d-e3e9-4448-a3ac-67308fb6645e",
-      "name": "Set API Keys",
-      "type": "n8n-nodes-base.set",
+      "id": "98fc3984-0c94-4d73-933b-60579c6ffc1d",
+      "name": "Tabloyu Güncelle",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
       "position": [
-        1936,
-        -80
-      ],
-      "notesInFlow": true,
-      "typeVersion": 3.4,
-      "notes": "SET BEFORE STARTING"
+        5300,
+        300
+      ]
     },
     {
       "parameters": {
-        "content": "## DO THIS FIRST\n",
-        "height": 220,
-        "width": 220,
+        "content": "## 🦊 Fındık'ın Meslek Macerası — Otomatik Bölüm Üretici\n\n**Yarı otonom mod:** Bölümleri sen `Seneryo/sezon-1` tablosuna yazarsın, workflow'u **Elle Başlat** ile çalıştırırsın. `production = for production` olan **ilk** bölüm üretilir, bitmiş video `final` klasörüne düşer. Başka hiçbir yere yüklenmez.\n\n**İlk kurulum:**\n1. **Ayarlar** node'unu doldur (API anahtarları, `Seneryo/sezon-1` Sheet ID, `sesler`, `final` ve `fındık referans` klasör ID'leri).\n2. OpenAI, Google Sheets ve Google Drive node'larına credential bağla.\n3. **Elle Başlat** → Test workflow.\n\nTam otomatiğe geçmek istersen **Her Gün 07:00** node'unu aktif et.\n\n**Bakiye koruması:** Başta PiAPI bakiyesi kontrol edilir; `Minimum PiAPI Bakiye USD` altındaysa workflow hiçbir şey üretmeden durur.\n\n**Karakter tutarlılığı:** Workflow her çalıştığında `fındık referans` klasöründeki PNG'yi alır ve her sahnede Fındık'ı bu görsele göre çizer (Flux Kontext). Klasörde tek bir PNG tut.\n\nTüm dizi kuralları: `content/seri-rehberi.md`",
+        "height": 500,
+        "width": 1140,
+        "color": 5
+      },
+      "id": "2df090b3-ed16-4b4c-9087-6eb65df1267e",
+      "name": "Not: Başlangıç",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 1. Senaryo\nOpenAI 10 sahnelik senaryoyu JSON olarak yazar. **Senaryoyu Ayrıştır** bunu doğrular (10 sahne, en fazla 14 kelime), açılış/kapanış cümlelerini sabitler ve karakter kartını görsel prompt'larına **kodla** ekler. Geçersizse en fazla 3 kez yeniden yazdırır.",
+        "height": 420,
+        "width": 640,
+        "color": 4
+      },
+      "id": "ac21d82a-5334-4655-a8fb-1e0b44eef751",
+      "name": "Not: Senaryo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 2. Sahne döngüsü (her sahne sırayla)\nFlux ile görsel → Kling ile 5 sn video. Her görev bitene kadar beklenir; hata alan görev en fazla 3 kez yeniden üretilir, sonra workflow durur (boşa para yakmamak için). Kling modu ve versiyonu **Ayarlar**'dan değişir (`std` ≈ $0.26/klip).",
+        "height": 860,
+        "width": 2600,
+        "color": 6
+      },
+      "id": "ebee94b2-e687-4d04-beb5-c77393c0974e",
+      "name": "Not: Sahneler",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3060,
+        -900
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 3. Ses ve kurgu\nElevenLabs tüm anlatımı tek parça seslendirir, ses `sesler` klasörüne yüklenir. Creatomate 10 klibi ve sesi 1080x1920 tek videoda birleştirir; şablon gerekmez.",
+        "height": 560,
+        "width": 2140,
         "color": 3
       },
-      "id": "e74b2a5e-2aa2-4d43-8a6d-c507d593c864",
-      "name": "Sticky Note6",
+      "id": "27720089-95e7-4445-9b21-a765cb065c07",
+      "name": "Not: Kurgu",
       "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        1888,
-        -144
-      ],
-      "typeVersion": 1
+        3060,
+        160
+      ]
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "version": 2,
-            "leftValue": "",
-            "caseSensitive": true,
-            "typeValidation": "strict"
-          },
-          "combinator": "and",
-          "conditions": [
-            {
-              "id": "2681c0e9-aa45-4f0f-8933-6e6de324c7aa",
-              "operator": {
-                "type": "array",
-                "operation": "lengthGt",
-                "rightType": "number"
-              },
-              "leftValue": "={{$input.all()}}",
-              "rightValue": 1
-            }
-          ]
-        },
-        "options": {}
+        "content": "### 4. Drive\nBitmiş video `final` klasörüne `Bölüm N - Meslek.mp4` adıyla kaydedilir. Tabloda bölüm `done` olur, `final_output` sütununa video linki yazılır.",
+        "height": 400,
+        "width": 480,
+        "color": 7
       },
-      "id": "4c96c34f-8713-41f8-b2f0-a158b449c75d",
-      "name": "Validate list formatting",
-      "type": "n8n-nodes-base.if",
+      "id": "63751a25-677b-4e87-8789-b76a75a926a4",
+      "name": "Not: Drive",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
       "position": [
-        2608,
-        -32
-      ],
-      "typeVersion": 2.2
-    },
-    {
-      "parameters": {
-        "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "=🎬 Video Hazır Ustam! \\n\\nKonu: {{ $node[\"Load Google Sheet\"].json[\"idea\"] }} \\n\\nİndirme Linki: {{ $json.webContentLink }}",
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        5120,
-        -160
-      ],
-      "id": "d927a16b-af05-4fff-a681-60bd56591903",
-      "name": "Send a text message",
-      "webhookId": "d90cc4df-24dc-4cfa-9c3a-ce23c45c7769"
-    },
-    {
-      "parameters": {
-        "modelId": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gpt-4o-mini",
-          "cachedResultName": "GPT-4O-MINI"
-        },
-        "messages": {
-          "values": [
-            {
-              "content": "DO NOT include any quotation marks in your response. Do not put a quote at the beginning or the end of your response.\n\nSen uzman bir özel eğitimci ve psikologsun. Amacın otizm, down sendromu, disleksi ve diğer özel öğrenme güçlükleri hakkında aileleri bilinçlendirmek. Sana verilen konuya göre 5 kısa, eğitici ve şefkatli alt yazı (her biri 5-15 kelime) oluştur. Yanıtlarını tamamen Türkçe ver. Emojileri çok nadir kullan; sadece mesajı güçlendirecekse en fazla bir tane kullan, gerekmiyorsa atla. Hiçbir giriş veya çıkış cümlesi yazma.\n\nGuidelines:\n- Perspective: Ebeveynlere rehberlik eden, onları anlayan ve onlara doğrudan hitap eden bir bakış açısı.\n- Tone: Profesyonel, bilgi verici, şefkatli ve cesaretlendirici.\n- Content: Özel gereksinimli çocuklara yaklaşım, kriz anı yönetimi, doğru bilinen yanlışlar ve ailelere net tavsiyeler.\n- Narrative: Karşılaşılan zorlukla veya hassas bir durumla başla, şefkatli/doğru müdahaleyi göster ve umut verici bir cümleyle bitir.\n- Scenes: Hassas ve duygusal anları yargılamadan, destekleyici bir çerçeveden ele al.\n\nYour response should be a list of 5 items separated by \"\\n\" (for example: \"item1\\nitem2\\nitem3\\nitem4\\nitem5\")",
-              "role": "system"
-            },
-            {
-              "content": "={{ $('Load Google Sheet').item.json.idea }}"
-            }
-          ]
-        },
-        "simplify": false,
-        "options": {}
-      },
-      "id": "990b1f4b-d662-4d45-a59a-ffa4b27351d5",
-      "name": "Generate Video Captions",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "position": [
-        2320,
-        -64
-      ],
-      "typeVersion": 1.8
+        5060,
+        160
+      ]
     }
   ],
   "connections": {
-    "Get image": {
+    "Elle Başlat": {
       "main": [
         [
           {
-            "node": "Check for failures",
+            "node": "Ayarlar",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Generate Image": {
+    "Her Gün 07:00": {
       "main": [
         [
           {
-            "node": "Wait 3min",
+            "node": "Ayarlar",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Image-to-Video": {
+    "Ayarlar": {
       "main": [
         [
           {
-            "node": "Wait 10min",
+            "node": "PiAPI Bakiye",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Video": {
+    "PiAPI Bakiye": {
       "main": [
         [
           {
-            "node": "Fail check",
+            "node": "Bakiye Kontrol",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "List Elements": {
+    "Bakiye Kontrol": {
       "main": [
         [
           {
-            "node": "Pair Videos with Audio",
+            "node": "Referans Görseli Bul",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait 10min": {
+    "Referans Görseli Bul": {
       "main": [
         [
           {
-            "node": "Get Video",
+            "node": "Referans Kontrol",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait 3min": {
+    "Referans Kontrol": {
       "main": [
         [
           {
-            "node": "Get image",
+            "node": "Referans Paylaşım İzni",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Wait 5min": {
+    "Referans Paylaşım İzni": {
       "main": [
         [
           {
-            "node": "Generate Image",
+            "node": "Bölümleri Oku",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Generate voice": {
+    "Bölümleri Oku": {
       "main": [
         [
           {
-            "node": "Upload Voice Audio",
+            "node": "İlk Bölümü Al",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "List Elements1": {
+    "İlk Bölümü Al": {
       "main": [
         [
           {
-            "node": "Pair Videos with Audio",
+            "node": "Bölüm Var mı?",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
     },
-    "Fail check": {
+    "Bölüm Var mı?": {
       "main": [
         [
           {
-            "node": "Wait to retry",
+            "node": "Senaryo Yaz",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Senaryo Yaz": {
+      "main": [
+        [
+          {
+            "node": "Senaryoyu Ayrıştır",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Senaryoyu Ayrıştır": {
+      "main": [
+        [
+          {
+            "node": "Senaryo Geçerli mi?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Senaryo Geçerli mi?": {
+      "main": [
+        [
+          {
+            "node": "Sahne Döngüsü",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Match captions with videos",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Wait to retry": {
-      "main": [
-        [
-          {
-            "node": "Image-to-Video",
+            "node": "Senaryo Yaz",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Generate Image Prompts": {
+    "Sahne Döngüsü": {
       "main": [
         [
           {
-            "node": "Calculate Token Usage",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calculate Token Usage": {
-      "main": [
-        [
-          {
-            "node": "Generate Image",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check for failures": {
-      "main": [
-        [
-          {
-            "node": "Wait 5min",
+            "node": "Bölümü Topla",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Image-to-Video",
+            "node": "Görsel Üret",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Match captions with videos": {
+    "Görsel Üret": {
       "main": [
         [
           {
-            "node": "List Elements",
+            "node": "Görseli Bekle",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Generate Script": {
+    "Görseli Bekle": {
       "main": [
         [
           {
-            "node": "Generate voice",
+            "node": "Görsel Durumu",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Upload Voice Audio": {
+    "Görsel Durumu": {
       "main": [
         [
           {
-            "node": "Set Access Permissions",
+            "node": "Görsel Kontrol",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set Access Permissions": {
+    "Görsel Kontrol": {
       "main": [
         [
           {
-            "node": "List Elements1",
+            "node": "Görsel Hazır mı?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Pair Videos with Audio": {
+    "Görsel Hazır mı?": {
       "main": [
         [
           {
-            "node": "Render Final Video",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Render Final Video": {
-      "main": [
-        [
-          {
-            "node": "Wait1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Once Per Day": {
-      "main": [
-        [
-          {
-            "node": "Set API Keys",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Load Google Sheet": {
-      "main": [
-        [
-          {
-            "node": "Generate Video Captions",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create List": {
-      "main": [
-        [
-          {
-            "node": "Validate list formatting",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait1": {
-      "main": [
-        [
-          {
-            "node": "Get Final Video",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Final Video": {
-      "main": [
-        [
-          {
-            "node": "Get Raw File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Upload Final Video": {
-      "main": [
-        [
-          {
-            "node": "Set Permissions",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Raw File": {
-      "main": [
-        [
-          {
-            "node": "Upload Final Video",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set Permissions": {
-      "main": [
-        [
-          {
-            "node": "Update Google Sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update Google Sheet": {
-      "main": [
-        [
-          {
-            "node": "Send a text message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set API Keys": {
-      "main": [
-        [
-          {
-            "node": "Load Google Sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Validate list formatting": {
-      "main": [
-        [
-          {
-            "node": "Generate Image Prompts",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Match captions with videos",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Generate Script",
+            "node": "Video Üret",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Generate Video Captions",
+            "node": "Görsel Hatalı mı?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Generate Video Captions": {
+    "Görsel Hatalı mı?": {
       "main": [
         [
           {
-            "node": "Create List",
+            "node": "Görsel Üret",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Görseli Tekrar Bekle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Görseli Tekrar Bekle": {
+      "main": [
+        [
+          {
+            "node": "Görsel Durumu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Üret": {
+      "main": [
+        [
+          {
+            "node": "Videoyu Bekle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videoyu Bekle": {
+      "main": [
+        [
+          {
+            "node": "Video Durumu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Durumu": {
+      "main": [
+        [
+          {
+            "node": "Video Kontrol",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Kontrol": {
+      "main": [
+        [
+          {
+            "node": "Video Hazır mı?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Hazır mı?": {
+      "main": [
+        [
+          {
+            "node": "Sahneyi Kaydet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Video Hatalı mı?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Hatalı mı?": {
+      "main": [
+        [
+          {
+            "node": "Video Üret",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Videoyu Tekrar Bekle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videoyu Tekrar Bekle": {
+      "main": [
+        [
+          {
+            "node": "Video Durumu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sahneyi Kaydet": {
+      "main": [
+        [
+          {
+            "node": "Sahne Döngüsü",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bölümü Topla": {
+      "main": [
+        [
+          {
+            "node": "Seslendir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seslendir": {
+      "main": [
+        [
+          {
+            "node": "Ses Dosyasını Yükle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ses Dosyasını Yükle": {
+      "main": [
+        [
+          {
+            "node": "Ses Paylaşım İzni",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ses Paylaşım İzni": {
+      "main": [
+        [
+          {
+            "node": "Kurgu Hazırla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kurgu Hazırla": {
+      "main": [
+        [
+          {
+            "node": "Videoyu Birleştir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videoyu Birleştir": {
+      "main": [
+        [
+          {
+            "node": "Kurguyu Bekle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kurguyu Bekle": {
+      "main": [
+        [
+          {
+            "node": "Kurgu Durumu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kurgu Durumu": {
+      "main": [
+        [
+          {
+            "node": "Kurgu Hazır mı?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kurgu Hazır mı?": {
+      "main": [
+        [
+          {
+            "node": "Videoyu İndir",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kurgu Hatalı mı?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kurgu Hatalı mı?": {
+      "main": [
+        [
+          {
+            "node": "Kurgu Hatası",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kurguyu Bekle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videoyu İndir": {
+      "main": [
+        [
+          {
+            "node": "Videoyu Arşivle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videoyu Arşivle": {
+      "main": [
+        [
+          {
+            "node": "Tabloyu Güncelle",
             "type": "main",
             "index": 0
           }
@@ -1646,8 +1847,10 @@
     }
   },
   "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "REDACTED"
+    "templateCredsSetupCompleted": false
   }
 }
